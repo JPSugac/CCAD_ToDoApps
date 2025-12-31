@@ -4,40 +4,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-シンプルなToDoアプリケーション。HTML/CSS/JavaScriptのみで構成され、データはlocalStorageに永続化。
+Next.js (App Router) + TypeScriptで構築されたToDoアプリケーション。データはlocalStorageに永続化。
 
-## Development
-
-ビルドツール不要。ブラウザで直接 `index.html` を開くか、ローカルサーバーで起動:
+## Commands
 
 ```bash
-# Python 3
-python -m http.server 8000
-
-# Node.js (npx)
-npx serve .
+npm run dev      # 開発サーバー起動 (http://localhost:3000)
+npm run build    # プロダクションビルド
+npm run start    # プロダクションサーバー起動
+npm run lint     # ESLint実行
 ```
 
 ## Architecture
 
-- `index.html` - メインHTML構造
-- `style.css` - スタイリング（グラデーション背景、カードレイアウト）
-- `app.js` - アプリロジック
-
-### データ構造
-
-```javascript
-// localStorage key: 'todos'
-{
-  id: string,        // ユニークID
-  text: string,      // タスク内容
-  completed: boolean,
-  createdAt: string  // ISO日時
-}
+```
+src/
+├── app/
+│   ├── layout.tsx      # ルートレイアウト
+│   ├── page.tsx        # メインページ（クライアントコンポーネント）
+│   └── globals.css     # グローバルスタイル
+├── components/
+│   ├── TodoForm.tsx    # タスク入力フォーム
+│   ├── TodoList.tsx    # タスクリスト表示
+│   ├── TodoItem.tsx    # 個別タスク
+│   └── Footer.tsx      # カウント・完了済み削除
+├── hooks/
+│   └── useTodos.ts     # localStorage + 状態管理
+└── types/
+    └── todo.ts         # Todo型定義
 ```
 
-### 主要関数 (app.js)
+### データフロー
 
-- `loadTodos()` / `saveTodos()` - localStorage操作
-- `addTodo()` / `toggleTodo()` / `deleteTodo()` - CRUD操作
-- `render()` - DOM更新
+1. `useTodos` フック: localStorage読み込み → useState管理 → 変更時にlocalStorage保存
+2. `page.tsx`: useTodosからデータ・操作関数を取得し、子コンポーネントにprops渡し
+3. 各コンポーネント: propsで受け取ったコールバックを実行
+
+### Todo型
+
+```typescript
+interface Todo {
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: string;
+}
+```
